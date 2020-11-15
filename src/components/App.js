@@ -2,11 +2,16 @@ import React, { Component } from 'react';
 import SearchBar from './SearchBar'
 import youtube from '../apis/youtube'
 import VideoList from './VideoList';
+import VideoDetail from './VideoDetail';
 
 class App extends Component {
        
-    state = { videos: []};  
+    state = { videos: [], selectedVideo: null };  
 
+    componentDidMount(){
+        this.handleTermSubmit('ronaldo');
+    }
+    
     handleTermSubmit = async term => {
         const response = await youtube.get('/search',{
             params:{
@@ -14,7 +19,14 @@ class App extends Component {
             }
         })
 
-        this.setState({videos:response.data.items})
+        this.setState({
+            videos:response.data.items,
+            selectedVideo:response.data.items[0]
+        })
+    }
+
+    handleVideoSelect = video =>{
+        this.setState({selectedVideo:video});
     }
 
 
@@ -22,8 +34,16 @@ class App extends Component {
         return (
             <div className='ui container'>
                 <SearchBar handleFormSubmit ={this.handleTermSubmit}/>
-                {this.state.videos.length} videos
-                <VideoList videos={this.state.videos}/>
+                <div className='ui grid'>
+                    <div className='ui row'>
+                        <div className='eleven wide column'>
+                            <VideoDetail video = {this.state.selectedVideo} />
+                        </div>
+                        <div className='five wide column'>
+                            <VideoList handleVideoSelect={this.handleVideoSelect } videos={this.state.videos}/>            
+                        </div>    
+                    </div>
+                </div> 
             </div>
         );
     }
